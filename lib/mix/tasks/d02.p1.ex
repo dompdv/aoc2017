@@ -5,7 +5,6 @@ defmodule Mix.Tasks.D02.P1 do
 
   @shortdoc "Day 02 Part 1"
   def run(args) do
-    input = "5\t1\t9\t5\n7\t5\t3\n2\t4\t6\t8"
     input = AdventOfCode.Input.get!(2, 2017)
 
     if Enum.member?(args, "-b"),
