@@ -1,5 +1,5 @@
 defmodule AdventOfCode.Day10 do
-  def reverse_sublist(l, position, length, skip, list_length) do
+  def reverse_sublist(l, position, length, list_length) do
     last_pos = position + length - 1
     last_index = rem(last_pos, list_length)
     overflow = last_pos >= list_length
@@ -21,7 +21,7 @@ defmodule AdventOfCode.Day10 do
       {l, position, skip},
       fn length, {current_list, current_position, skip} ->
         {
-          reverse_sublist(current_list, current_position, length, skip, list_length),
+          reverse_sublist(current_list, current_position, length, list_length),
           rem(current_position + length + skip, list_length),
           skip + 1
         }
