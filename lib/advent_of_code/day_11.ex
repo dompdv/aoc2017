@@ -6,18 +6,28 @@ defmodule AdventOfCode.Day11 do
   def move("s", {q, r, s}), do: {q - 1, r + 1, s}
   def move("se", {q, r, s}), do: {q, r + 1, s - 1}
 
-  def part1(args) do
-    {q, r, s} =
-      args
-      |> String.trim()
-      |> String.split(",", trim: true)
-      |> Enum.reduce({0, 0, 0}, &move/2)
-      |> IO.inspect()
+  def dist({q, r, s}), do: div(abs(q) + abs(r) + abs(s), 2)
 
-    div(abs(q) + abs(r) + abs(s), 2)
+  def part1(args) do
+    args
+    |> String.trim()
+    |> String.split(",", trim: true)
+    |> Enum.reduce({0, 0, 0}, &move/2)
+    |> dist()
   end
 
-  def part2(_args) do
-    :ok
+  def part2(args) do
+    args
+    |> String.trim()
+    |> String.split(",", trim: true)
+    |> Enum.reduce(
+      {0, {0, 0, 0}},
+      fn direction, {max_so_far, position} ->
+        new_position = move(direction, position)
+        new_max = max(max_so_far, dist(new_position))
+        {new_max, new_position}
+      end
+    )
+    |> elem(0)
   end
 end
