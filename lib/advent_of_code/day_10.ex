@@ -15,36 +15,48 @@ defmodule AdventOfCode.Day10 do
     end
   end
 
-  def one_round(l, lengths, position, skip, list_length) do
-    Enum.reduce(lengths, {l, position, skip}, fn length, {current_list, current_position, skip} ->
-      {reverse_sublist(current_list, current_position, length, skip, list_length),
-       rem(current_position + length + skip, list_length), skip + 1}
-    end)
+  def one_round(lengths, l, position, skip, list_length) do
+    lengths
+    |> Enum.reduce(
+      {l, position, skip},
+      fn length, {current_list, current_position, skip} ->
+        {reverse_sublist(current_list, current_position, length, skip, list_length),
+         rem(current_position + length + skip, list_length), skip + 1}
+      end
+    )
   end
 
   def part1(args) do
     list_length = 256
     initial_list = for i <- 0..(list_length - 1), into: %{}, do: {i, i}
-    #    args = "3,4,1,5\n"
+
     args
     |> String.trim()
     |> String.split(",", trim: true)
     |> Enum.map(&String.to_integer/1)
-    |> Enum.reduce({initial_list, 0, 0}, fn length, {current_list, current_position, skip} ->
-      {reverse_sublist(current_list, current_position, length, skip, list_length),
-       rem(current_position + length + skip, list_length), skip + 1}
-    end)
+    |> one_round(initial_list, 0, 0, list_length)
     |> elem(0)
     |> then(fn d -> d[0] * d[1] end)
   end
 
   def part2(args) do
-    args = "3,4,1,5\n"
-    args = "1,2,3\n"
+    list_length = 256
+    initial_list = for i <- 0..(list_length - 1), into: %{}, do: {i, i}
 
-    args
-    |> String.trim()
-    |> String.to_charlist()
-    |> then(fn l -> l ++ [17, 31, 73, 47, 23] end)
+    sequence =
+      args
+      |> String.trim()
+      |> String.to_charlist()
+      |> then(fn l -> l ++ [17, 31, 73, 47, 23] end)
+
+    Enum.reduce(1..64, {initial_list, 0, 0}, fn _, {list, position, skip} ->
+      one_round(sequence, list, position, skip, list_length)
+    end)
+    |> elem(0)
+    |> then(fn l -> for i <- 0..(list_length - 1), do: l[i] end)
+    |> Enum.chunk_every(16)
+    |> Enum.map(fn block -> Enum.reduce(block, &Bitwise.bxor/2) end)
+    |> Enum.map(fn n -> Integer.to_string(n, 16) end)
+    |> Enum.join()
   end
 end
