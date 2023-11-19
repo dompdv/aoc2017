@@ -1,14 +1,13 @@
 defmodule AdventOfCode.Day13 do
   import Enum
 
-  def list_to_integers(list), do: list |> map(&String.to_integer/1)
+  def parse_line(line),
+    do: line |> String.split(": ", trim: true) |> map(&String.to_integer/1) |> List.to_tuple()
 
   def parse(args) do
     args
     |> String.split("\n", trim: true)
-    |> map(fn line ->
-      line |> String.split(": ", trim: true) |> list_to_integers() |> List.to_tuple()
-    end)
+    |> map(&parse_line/1)
     |> Map.new()
   end
 
@@ -16,6 +15,8 @@ defmodule AdventOfCode.Day13 do
     args
     |> parse()
     |> Enum.reduce(0, fn {i, m}, score ->
+      # the magic happens here. We use the fact that there is a loop of size 2 * (m - 1)
+      # and we can calculate the position of the scanner at time i by doing rem(i, 2 * (m - 1))
       score +
         if rem(i, 2 * (m - 1)) == 0,
           do: i * m,
