@@ -70,7 +70,7 @@ defmodule AdventOfCode.Day10 do
     |> Enum.chunk_every(16)
     |> Enum.map(fn block -> Enum.reduce(block, &Bitwise.bxor/2) end)
     # Convert to hex
-    |> Enum.map(fn n -> Integer.to_string(n, 16) end)
+    |> Enum.map(fn n -> Integer.to_string(n, 16) |> String.pad_leading(2, "0") end)
     |> Enum.join()
   end
 end
