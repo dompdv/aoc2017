@@ -50,10 +50,7 @@ defmodule AdventOfCode.Day16 do
     mapping |> Map.put(a, mapping[b]) |> Map.put(b, mapping[a])
   end
 
-  def one_dance(steps, starting_point) do
-    steps
-    |> Enum.reduce(starting_point, &next_state/2)
-  end
+  def one_dance(steps, starting_point), do: Enum.reduce(steps, starting_point, &next_state/2)
 
   def part1(args) do
     n_dancers = 16
@@ -92,6 +89,7 @@ defmodule AdventOfCode.Day16 do
   end
 
   # Find the number of iterations to go back to the initial state
+  # It's the PPCM of the lengths of the cycles
   def decomp_perm(permutation),
     do: decomp_perm(permutation, Map.values(permutation), []) |> Enum.map(&Enum.count/1) |> lcm()
 
