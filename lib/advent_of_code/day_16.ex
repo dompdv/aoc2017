@@ -75,36 +75,40 @@ defmodule AdventOfCode.Day16 do
   def gcd(a, b), do: gcd(b, rem(a, b))
 
   def lcm(a, b), do: div(abs(a * b), gcd(a, b))
+  def lcm(l), do: Enum.reduce(l, 1, &lcm/2)
+
+  # Find a cycle in a permutation starting from s
+  def find_cycle(permutation, s, cycle) do
+    ps = permutation[s]
+    if ps in cycle, do: cycle, else: find_cycle(permutation, ps, [ps | cycle])
+  end
+
+  # Decompose a permutation into cycles
+  def decomp_perm(_permutation, [], cycles), do: cycles
+
+  def decomp_perm(permutation, [s | to_visit], cycles) do
+    cycle = find_cycle(permutation, s, [s])
+    decomp_perm(permutation, to_visit -- cycle, [cycle | cycles])
+  end
+
+  # Find the number of iterations to go back to the initial state
+  def decomp_perm(permutation),
+    do: decomp_perm(permutation, Map.values(permutation), []) |> Enum.map(&Enum.count/1) |> lcm()
 
   def part2(args) do
     #    args = "s1,x3/4,pe/b"
     #    args = List.duplicate("s1", 4) |> Enum.join(",")
     n_dancers = 16
+    initial_order = inital_state(n_dancers)
 
     permutation =
       args
       |> parse_input()
-      |> one_dance(inital_state(n_dancers))
-      |> print_s()
-      |> IO.inspect(label: "permutation")
-
-    decomp_perm(permutation)
-    |> IO.inspect(label: "cycles")
-    |> Enum.map(&Enum.count/1)
-    |> IO.inspect(label: "cycle sizes")
-
-    initial_order = inital_state(n_dancers)
+      |> one_dance(initial_order)
 
     loop_size =
-      Enum.reduce_while(
-        1..1_000_000_000,
-        initial_order |> print_s(),
-        fn i, state ->
-          new_state = state |> apply_permutation(permutation) |> print_s()
-          if new_state == initial_order, do: {:halt, i}, else: {:cont, new_state}
-        end
-      )
-      |> IO.inspect(label: "loop")
+      decomp_perm(permutation)
+      |> IO.inspect(label: "cycles")
 
     Enum.reduce(
       1..rem(1_000_000_000, loop_size),
@@ -114,21 +118,8 @@ defmodule AdventOfCode.Day16 do
         apply_permutation(state, permutation) |> print_s()
       end
     )
+    |> print_s()
 
     :ok
   end
-
-  def find_cycle(permutation, s, cycle) do
-    ps = permutation[s]
-    if ps in cycle, do: cycle, else: find_cycle(permutation, ps, [ps | cycle])
-  end
-
-  def decomp_perm(_permutation, [], cycles), do: cycles
-
-  def decomp_perm(permutation, [s | to_visit], cycles) do
-    cycle = find_cycle(permutation, s, [s]) |> IO.inspect(label: "cycle")
-    decomp_perm(permutation, to_visit -- cycle, [cycle | cycles])
-  end
-
-  def decomp_perm(permutation), do: decomp_perm(permutation, Map.values(permutation), [])
 end
